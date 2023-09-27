@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom'
 
 const Header = () => {
   return (
-    <header class="page-header">
-            <div class="header-logo">
+    <header className="page-header">
+            <div className="header-logo">
                 <h2>
-                    <Link to="/" class="header-icon-link">OgCiSum</Link>
+                    <Link to="/" className="header-icon-link">OgCiSum</Link>
                 </h2>
             </div>
-            <div class="header-app-description">
+            <div className="header-app-description">
                 <span>Create & Share Location Based Music Samples!</span>
             </div>
      </header>

@@ -1,77 +1,211 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom';
+
+const apiKey = "U9szHIQzZ7"
+const apiURL = "https://comp2140.uqcloud.net/api/"
+
+async function getOneSample(id) {
+    const response = await fetch(`${apiURL}sample/${id}/?api_key=${apiKey}`)
+    const responseJson = await response.json();
+    return responseJson;
+}
+
+async function postSample(type, name, recordingData) {
+    const postData = {
+        'type': type,
+        'name': name,
+        'recording_data': JSON.stringify(recordingData),
+        'api_key': apiKey
+    }
+    try {
+        const response = await fetch(`${apiURL}sample/?api_key=${apiKey}`, {
+            method: 'POST',
+            header: {
+                'Accept': 'application/type',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(postData)
+        })
+        const responseJson = await response.json();
+        return responseJson
+    }catch (error){
+        console.log("Error inserting data: ", error)
+    }
+}
+
+async function editSample(id, type, name, recordingData) {
+    const updatedData = {
+        'type': type,
+        'name': name,
+        'recording_data': JSON.stringify(recordingData),
+        'api_key': apiKey
+    }
+    try {
+        const response = await fetch(`${apiURL}sample/${id}/?api_key=${apiKey}`, {
+            method: 'PUT',
+            header: {
+                'Accept': 'application/type',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedData)
+        })
+        const responseJson = await response.json();
+        return responseJson
+    } catch (error) {
+        console.log("Error editing Data", error)
+    }
+}
 
 const EditSample = () => {
-  return (
-    <main>
-            <h2 class="title">Edit Sample:</h2>
-            <form class="card edit-card">
-                <input type="text" value="" ></input>
-                <div class="button-group-container">
-                        <button type="button" class="bright-button">Save</button>
+    const getUrl = useLocation()
+    const searchParams = new URLSearchParams(getUrl.search)
+    const notes = ['B', 'A', 'G', 'F', 'E', 'D', 'C']
+    const songId = Number(searchParams.get('id'))
+    const [isNew, setIsNew] = useState(true)
+    const [type, setType] = useState('drums')
+    const [name, setName] = useState('')
+    const [recordingData, setRecordingData] = useState([
+        {
+            "B": [true, false, false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false]
+        },
+        {
+            "A": [false, false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false]
+        },
+        {
+            "G": [false, false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false]
+        },
+        {
+            "F": [false, false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false]
+        },
+        {
+            "E": [false, false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false]
+        },
+        {
+            "D": [false, false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false]
+        },
+        {
+            "C": [false, false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false]
+        }
+    ])
+
+    const handleSubmit = () => {
+        if(isNew){
+            postSample(type,name,recordingData)
+        }
+        else{
+            editSample(songId, type, name, recordingData)
+        }
+    }
+
+
+    const handleToggleButton = (note, index) => {
+        const updatedRecordingData = [...recordingData]
+        updatedRecordingData.forEach((data) => {
+            if (data.hasOwnProperty(note)) {
+                data[note][index] = !data[note][index]
+            }
+        })
+        setRecordingData(updatedRecordingData)
+    }
+
+    useEffect(() => {
+        async function fetchSong(songId) {
+            try {
+                const currentSong = await getOneSample(songId)
+                setType(currentSong.type)
+                setName(currentSong.name)
+                setRecordingData(JSON.parse(currentSong.recording_data))
+
+
+            } catch (error) {
+                console.error("Error fetching data: ", error)
+            }
+        }
+        if (songId) {
+            setIsNew(false)
+            fetchSong(songId)
+        }
+    }, [])
+
+
+    // console.log("recordingData",recordingData)
+    return (
+        <main>
+            <button>Back to Home</button>
+            <h2 className="title">Edit Sample:</h2>
+            <form className="card edit-card">
+                <input type="text" value={name} onChange={(e) => { setName(e.target.value) }}></input>
+                <div className="button-group-container">
+                    <button type="button" className="bright-button" onClick={handleSubmit}>Save</button>
                 </div>
             </form>
 
-            <div class="toggle-row-container">
-                <div class="row-label">
+            <div className="toggle-row-container">
+                <div className="row-label">
                     <h4>Instrument</h4>
-                 </div>
-                <div class="sequence-row-container">
-                    <button class="toggle-selected">Guitar</button>
-                    <button class="toggle">Piano</button>
-                    <button class="toggle">Violin</button>
-                    <button class="toggle">Drums</button>
+                </div>
+                <div className="sequence-row-container">
+                    <button className={(type === 'guitar') ? 'toggle-selected' : 'toggle'} onClick={() => setType('guitar')}>Guitar</button>
+                    <button className={(type === 'piano') ? 'toggle-selected' : 'toggle'} onClick={() => setType('piano')}>Piano</button>
+                    <button className={(type === 'violin') ? 'toggle-selected' : 'toggle'} onClick={() => setType('violin')}>Violin</button>
+                    <button className={(type === 'drums') ? 'toggle-selected' : 'toggle'} onClick={() => setType('drums')}>Drums</button>
                 </div>
             </div>
 
-        <div class="toggle-row-container">
-            <div class="row-label">
-                <h4>B</h4>
-            </div>
-            <div class="sequence-row-container">
-                    <button class="toggle-selected"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle-selected"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle-selected"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle-selected"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle"></button>
-                    <button class="toggle"></button>
-            </div>
-        </div>
+            {
 
-        <div class="toggle-row-container">
-            <div class="row-label">
-                <h4>A</h4>
-            </div>
-            <div class="sequence-row-container">
-                <button class="toggle-selected"></button>
-                <button class="toggle"></button>
-                <button class="toggle"></button>
-                <button class="toggle"></button>
-                <button class="toggle-selected"></button>
-                <button class="toggle"></button>
-                <button class="toggle"></button>
-                <button class="toggle"></button>
-                <button class="toggle-selected"></button>
-                <button class="toggle"></button>
-                <button class="toggle"></button>
-                <button class="toggle"></button>
-                <button class="toggle-selected"></button>
-                <button class="toggle"></button>
-                <button class="toggle"></button>
-                <button class="toggle"></button>
-            </div>
-        </div>
-    </main>
-  )
+                recordingData.map((data, index) => {
+                    const note = Object.keys(data)[0]
+                    const values = data[note]
+                    return (
+                        <div className="toggle-row-container" key={index}>
+                            <div className="row-label">
+                                <h4>{note}</h4>
+                            </div>
+                            <div className="sequence-row-container">
+                                {values.map((isTrue, indexButton) => (
+                                    <button className={isTrue ? "toggle-selected" : "toggle"} key={indexButton} onClick={() => handleToggleButton(note, indexButton)}></button>
+
+                                ))}
+                            </div>
+                        </div>
+                    )
+                })
+            }
+
+
+            {/* <div className="toggle-row-container">
+                <div className="row-label">
+                    <h4>A</h4>
+                </div>
+                <div className="sequence-row-container">
+                    <button className="toggle-selected"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle-selected"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle-selected"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle-selected"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle"></button>
+                    <button className="toggle"></button>
+                </div>
+            </div> */}
+        </main>
+    )
 }
 
 export default EditSample

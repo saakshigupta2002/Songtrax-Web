@@ -20,8 +20,8 @@ async function postSample(type, name, recordingData) {
     try {
         const response = await fetch(`${apiURL}sample/?api_key=${apiKey}`, {
             method: 'POST',
-            header: {
-                'Accept': 'application/type',
+            headers: {
+                'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(postData)
@@ -35,17 +35,18 @@ async function postSample(type, name, recordingData) {
 
 async function editSample(id, type, name, recordingData) {
     const updatedData = {
-        'type': type,
+        'id': id,
+        'api_key': apiKey,
         'name': name,
         'recording_data': JSON.stringify(recordingData),
-        'api_key': apiKey
+        'type': type
     }
     try {
         const response = await fetch(`${apiURL}sample/${id}/?api_key=${apiKey}`, {
-            method: 'PUT',
-            header: {
-                'Accept': 'application/type',
-                'Content-Type': 'application/json'
+            method: "PUT",
+            headers: {
+                'Accept': "application/json",
+                'Content-Type': "application/json"
             },
             body: JSON.stringify(updatedData)
         })
@@ -59,7 +60,6 @@ async function editSample(id, type, name, recordingData) {
 const EditSample = () => {
     const getUrl = useLocation()
     const searchParams = new URLSearchParams(getUrl.search)
-    const notes = ['B', 'A', 'G', 'F', 'E', 'D', 'C']
     const songId = Number(searchParams.get('id'))
     const [isNew, setIsNew] = useState(true)
     const [type, setType] = useState('drums')

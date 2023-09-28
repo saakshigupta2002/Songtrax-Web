@@ -211,12 +211,16 @@ button:hover {
 a:not(.shared, .header-icon-link),
 button {
   border-color: var(--fgColor);
+  cursor: pointer;
 }
 
 .bright-button {
   background-color: var(--fgColor);
   color: var(--bgColor);
+  cursor: pointer;
 }
+
+
 
 /* Toggle switch buttons for sequencer and sharing toggle */
 .toggle {
@@ -237,6 +241,7 @@ button {
   flex-basis: 0;
   margin: -1px -1px -1px -1px;
   height: 2.5rem;
+  cursor: pointer;
 }
 
 .toggle:hover,

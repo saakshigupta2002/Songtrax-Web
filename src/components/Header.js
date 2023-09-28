@@ -6,7 +6,7 @@ const Header = () => {
     <header className="page-header">
             <div className="header-logo">
                 <h2>
-                    <Link to="/" className="header-icon-link">OgCiSum</Link>
+                    <Link to="/" className="header-icon-link">SongTrax</Link>
                 </h2>
             </div>
             <div className="header-app-description">

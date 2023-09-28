@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import Header from './components/Header';
 import ListSamples from './components/ListSamples';
-import ShareSamples from './components/ShareSamples';
+import ShareSample from './components/ShareSample';
 import EditSample from './components/EditSample';
 import { useState } from 'react';
 
@@ -17,7 +17,7 @@ function App() {
         
         <Routes>
           <Route path="/" element={<ListSamples setEditSongId={setEditSongId} />} />
-          <Route path="/share-samples" element={<ShareSamples />} />
+          <Route path="/share-sample" element={<ShareSample />} />
           <Route path="/edit-sample" element={<EditSample />} />
 
         </Routes>

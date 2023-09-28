@@ -5,9 +5,14 @@ const apiKey = "U9szHIQzZ7"
 const apiURL = "https://comp2140.uqcloud.net/api/"
 
 async function getOneSample(id) {
-    const response = await fetch(`${apiURL}sample/${id}/?api_key=${apiKey}`)
-    const responseJson = await response.json();
-    return responseJson;
+    try{
+
+        const response = await fetch(`${apiURL}sample/${id}/?api_key=${apiKey}`)
+        const responseJson = await response.json();
+        return responseJson;
+    }catch(error){
+        console.log("Error fetching sample: ", error)
+    }
 }
 
 async function postSample(type, name, recordingData) {
@@ -138,7 +143,7 @@ const EditSample = () => {
     // console.log("recordingData",recordingData)
     return (
         <main>
-            <button>Back to Home</button>
+            {/* <button>Back to Home</button> */}
             <h2 className="title">Edit Sample:</h2>
             <form className="card edit-card">
                 <input type="text" value={name} onChange={(e) => { setName(e.target.value) }}></input>

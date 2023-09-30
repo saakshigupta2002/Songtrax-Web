@@ -1,61 +1,52 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import MusicPreview from './MusicPreview'
-import MusicSpinner from './animations/MusicSpinner';
+import MusicSpinner from './animations/MusicSpinner'
 import { fetchAllSamples, convertToDate } from '../utils/apiRequests'
 
-import * as Tone from 'tone';
-
-// const apiKey = "U9szHIQzZ7"
-// const apiURL = "https://comp2140.uqcloud.net/api/"
-
-// async function getAllSamples() {
-//     const response = await fetch(`${apiURL}sample/?api_key=${apiKey}`)
-//     const responseJson = await response.json();
-//     return responseJson
-// }
-
-// function convertToDate(datetimeString) {
-//     const dateTimeObject = new Date(datetimeString);
-//     const date = `${dateTimeObject.getFullYear()}-${dateTimeObject.getMonth() + 1}-${dateTimeObject.getDate()}`
-//     return date
-// }
-
+import * as Tone from 'tone'
 
 const ListSamples = () => {
-    const [songs, setSongs] = useState([])
-    const [isFetched, setIsFetched] = useState(false)
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentlyPlayingIndex, setCurrentlyPlayingIndex] = useState(null); 
+    const [songs, setSongs] = useState([]) //State to store all the songs from API
+    const [isFetched, setIsFetched] = useState(false)  
+    const [isPlaying, setIsPlaying] = useState(false) 
+    
+    const [currentlyPlayingIndex, setCurrentlyPlayingIndex] = useState(null) //keep track of which song is playing
 
-    const transport = Tone.Transport;
+    const transport = Tone.Transport
 
+    //handle when preview button is clicked
     const handlePlaybackChange = (playing, index) => {
         setIsPlaying(playing);
         if (playing) {
-            setCurrentlyPlayingIndex(index);
+            setCurrentlyPlayingIndex(index)
         } else {
-            setCurrentlyPlayingIndex(null); 
+            setCurrentlyPlayingIndex(null)
         }
-    };
+    }
+
+    //function to fetch all samples / songs by calling api function
     async function fetchSamples() {
 
         try {
-            const allSamples = await fetchAllSamples();
-            setSongs(allSamples);
+            const allSamples = await fetchAllSamples()
+            setSongs(allSamples)
         }
         catch (error) {
-            setSongs([]);
+            setSongs([])
             console.log("error fetching Data", error)
         }
         setIsFetched(true)
     }
 
+    //Load all samples when page renders first
     useEffect(() => {
         
         fetchSamples()
     }, [])
 
+
+    //When data is still not fetched completely
     if(!isFetched){
         return (
             <h1>Loading Data...</h1>

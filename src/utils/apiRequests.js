@@ -4,9 +4,14 @@ const apiURL = "https://comp2140.uqcloud.net/api/"
 
 //Fetch all the music samples from API
 export async function fetchAllSamples() {
-    const response = await fetch(`${apiURL}sample/?api_key=${apiKey}`)
-    const responseJson = await response.json();
-    return responseJson
+    try {
+
+        const response = await fetch(`${apiURL}sample/?api_key=${apiKey}`)
+        const responseJson = await response.json();
+        return responseJson
+    }catch(error){
+        console.error('Fetching from API failed: ', error)
+    }
 }
 
 //Fetch one of the music samples from API by ID

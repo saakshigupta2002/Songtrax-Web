@@ -7,114 +7,60 @@ import * as Tone from 'tone';
 import MusicSpinner from './animations/MusicSpinner';
 import LoadingSpinner from './animations/LoadingSpinner';
 
-// const apiKey = "U9szHIQzZ7"
-// const apiURL = "https://comp2140.uqcloud.net/api/"
-
-// async function fetchOneSample(id) {
-//     try {
-//         const response = await fetch(`${apiURL}sample/${id}/?api_key=${apiKey}`)
-//         const responseJson = await response.json();
-//         return responseJson;
-//     } catch (error) {
-//         console.error("Error fetching sample: ", error)
-//     }
-// }
-
-// async function fetchAllLocations() {
-//     try {
-//         const response = await fetch(`${apiURL}location/?api_key=${apiKey}`)
-//         const responseJson = await response.json();
-//         return responseJson;
-//     } catch (error) {
-//         console.error("Error fetching sample: ", error)
-//     }
-// }
-
-// async function fetchAllSamplesToLocations() {
-//     try {
-//         const response = await fetch(`${apiURL}sampletolocation/?api_key=${apiKey}`)
-//         const responseJson = await response.json();
-//         return responseJson;
-//     } catch (error) {
-//         console.error("Error fetching sample: ", error)
-//     }
-// }
-
-// async function postSampleToLocation(sampleId, locationId) {
-//     const postData = {
-//         'api_key': apiKey,
-//         'sample_id': sampleId,
-//         'location_id': locationId,
-//     }
-//     try {
-//         const response = await fetch(`${apiURL}sampletolocation/?api_key=${apiKey}`, {
-//             method: 'POST',
-//             headers: {
-//                 'Accept': 'application/json',
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(postData)
-//         })
-//         const responseJson = await response.json();
-//         return responseJson
-//     } catch (error) {
-//         console.error("Error Sharing Sample: ", error)
-//     }
-// }
-// async function deleteSampleToLocation(id) {
-//     try {
-//         const response = await fetch(`${apiURL}sampletolocation/${id}/?api_key=${apiKey}`, {
-//             method: 'DELETE'
-//         })
-//         const responseJson = await response.json();
-//         return responseJson;
-//     } catch (error) {
-//         console.error("Error fetching sample: ", error)
-//     }
-// }
-// function convertToDate(datetimeString) {
-//     const dateTimeObject = new Date(datetimeString);
-//     const date = `${dateTimeObject.getFullYear()}-${dateTimeObject.getMonth() + 1}-${dateTimeObject.getDate()}`
-//     return date
-// }
 
 const ShareSample = () => {
+    //keep track if music is playing or not
     const [isPlaying, setIsPlaying] = useState(false);
+
+    //get song id from url bar
     const getUrl = useLocation()
     const searchParams = new URLSearchParams(getUrl.search)
-    const [locations, setLocations] = useState([])
-    const [sampleToLocations, setSampletoLocations] = useState(null)
     const sampleId = Number(searchParams.get('id'))
+    
+    //states to store current sample's data
     const [currentSample, setCurrentSample] = useState(null)
     const [musicData, setMusicData] = useState(null)
+
+    const [locations, setLocations] = useState([])
+    const [sampleToLocations, setSampletoLocations] = useState(null)
+
+    //keep track of data submitting
     const [dataUpdated, setDataUpdated] = useState(0)
     const [toggleLoading, setToggleLoading] = useState(false)
 
     const transport = Tone.Transport;
 
+    //handle when preview button is clicked
     const handlePlaybackChange = (playing, index) => {
         setIsPlaying(playing);
 
     };
+
+    //Get all data of the current sample and its sharing data from APIs
     async function getAllData() {
-        const responseData = await fetchOneSample(sampleId)
+        const responseData = await fetchOneSample(sampleId) //fetch current sample by ID
         setCurrentSample(responseData)
-        const musicDataParse = JSON.parse(responseData.recording_data)
+
+        const musicDataParse = JSON.parse(responseData.recording_data) //get current music data for previewing
         setMusicData(musicDataParse)
 
-        const locationsData = await fetchAllLocations();
+        const locationsData = await fetchAllLocations(); //get All locations
         setLocations(locationsData)
 
-        const sampleToLocationData = await fetchAllSamplesToLocations()
+        const sampleToLocationData = await fetchAllSamplesToLocations() //get all sharing data
         setSampletoLocations(sampleToLocationData)
 
-        setToggleLoading(false)
+        setToggleLoading(false) //Loading and fetching data is complete
     }
+
+    //fetch all the data from API when page first renders
     useEffect(() => {
         getAllData()
         
     }, [dataUpdated])
 
+
+    //When data fetching / loading is in progress
     if (!currentSample) {
         return <h1>Loading...</h1>
     }

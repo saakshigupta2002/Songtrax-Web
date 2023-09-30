@@ -7,82 +7,31 @@ import MusicSpinner from './animations/MusicSpinner';
 import { fetchOneSample, postSample, editSample } from '../utils/apiRequests'
 
 
-const apiKey = "U9szHIQzZ7"
-const apiURL = "https://comp2140.uqcloud.net/api/"
-
-// async function fetchOneSample(id) {
-//     try {
-
-//         const response = await fetch(`${apiURL}sample/${id}/?api_key=${apiKey}`)
-//         const responseJson = await response.json();
-//         return responseJson;
-//     } catch (error) {
-//         console.error("Error fetching sample: ", error)
-//     }
-// }
-
-// async function postSample(type, name, recordingData) {
-//     const postData = {
-//         'type': type,
-//         'name': name,
-//         'recording_data': JSON.stringify(recordingData),
-//         'api_key': apiKey
-//     }
-//     try {
-//         const response = await fetch(`${apiURL}sample/?api_key=${apiKey}`, {
-//             method: 'POST',
-//             headers: {
-//                 'Accept': 'application/json',
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(postData)
-//         })
-//         if (response.ok) {
-//             return true
-//         }
-//         else {
-//             return false
-//         }
-//         // const responseJson = await response.json();
-//         // return responseJson
-//     } catch (error) {
-//         console.error("Error inserting data: ", error)
-//         return false
-//     }
-// }
-
-// async function editSample(id, type, name, recordingData) {
-//     const updatedData = {
-//         'id': id,
-//         'api_key': apiKey,
-//         'name': name,
-//         'recording_data': JSON.stringify(recordingData),
-//         'type': type
-//     }
-//     try {
-//         const response = await fetch(`${apiURL}sample/${id}/?api_key=${apiKey}`, {
-//             method: "PUT",
-//             headers: {
-//                 'Accept': "application/json",
-//                 'Content-Type': "application/json"
-//             },
-//             body: JSON.stringify(updatedData)
-//         })
-//         if (response.ok) {
-//             return true;
-//         }
-//         else {
-//             return false;
-//         }
-//         // const responseJson = await response.json();
-//         // return responseJson
-//     } catch (error) {
-//         console.error("Error editing Data", error)
-//         return false
-//     }
-// }
-
 const EditSample = () => {
+    
+    //States to keep track of music playing and initial loading
+    const [isInitialLoading, setInitialLoading] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    const [isNew, setIsNew] = useState(true) //if new sample is to be created or existing to be edited
+    const [type, setType] = useState('guitar') //Type of instrument (guitar by default)
+    const [name, setName] = useState('') 
+
+    //States to keep track of form submission and showing alerts
+    const [isSubmitted, setIsSubmitted] = useState(false) 
+    const [isError, setIsError] = useState(false)
+    const [isLoading, setIsLoading] = useState(false);
+    const [isNoName, setIsNoName] = useState(false)
+    
+    
+    const transport = Tone.Transport;
+    
+    //Get the id of current sample to be edited (if any) from URL bar
+    const getUrl = useLocation()
+    const searchParams = new URLSearchParams(getUrl.search)
+    const songId = Number(searchParams.get('id'))
+    
+    //initial empty recording data as placeholder
     const emptyRecordingData = [
         {
             "B": [false, false, false, false, false, false, false, false, false, false, false, false, false,
@@ -113,30 +62,15 @@ const EditSample = () => {
                 false, false, false, false]
         }
     ]
-    const [isPlaying, setIsPlaying] = useState(false);
-
-    const [isNew, setIsNew] = useState(true)
-    const [type, setType] = useState('guitar')
-    const [name, setName] = useState('')
-    const [isSubmitted, setIsSubmitted] = useState(false)
-    const [isError, setIsError] = useState(false)
-    const [isLoading, setIsLoading] = useState(false);
-    const [isNoName, setIsNoName] = useState(false)
-
-
-    const transport = Tone.Transport;
-
-    const getUrl = useLocation()
-    const searchParams = new URLSearchParams(getUrl.search)
-
-    const [songId, setSongId] = useState(Number(searchParams.get('id')))
-
     const [recordingData, setRecordingData] = useState(emptyRecordingData)
 
+    //handle when preview button is clicked
     const handlePlaybackChange = (playing, index) => {
         setIsPlaying(playing);
 
     };
+
+    //handle when sample save button is clicked
     const handleSubmit = async () => {
         setIsNoName(false);
         setIsError(false)
@@ -145,7 +79,7 @@ const EditSample = () => {
             setIsNoName(true);
             return
         }
-        setIsLoading(true); // Set loading to true when the request is sent.
+        setIsLoading(true); 
         try {
             if (isNew) {
                 const response = await postSample(type, name, recordingData)
@@ -175,7 +109,7 @@ const EditSample = () => {
         }
     }
 
-
+    //handle when a music button is clicked
     const handleToggleButton = (note, index) => {
         const updatedRecordingData = [...recordingData]
         updatedRecordingData.forEach((data) => {
@@ -186,25 +120,40 @@ const EditSample = () => {
         setRecordingData(updatedRecordingData)
     }
 
-    useEffect(() => {
-        async function fetchSong(songId) {
-            try {
-                const currentSong = await fetchOneSample(songId)
-                setType(currentSong.type)
-                setName(currentSong.name)
-                setRecordingData(JSON.parse(currentSong.recording_data))
+    //Fetch current song data which is to be edited by calling api function
+    async function fetchSong(songId) {
+        try {
+            const currentSong = await fetchOneSample(songId)
+            setType(currentSong.type)
+            setName(currentSong.name)
+            setRecordingData(JSON.parse(currentSong.recording_data))
 
 
-            } catch (error) {
-                console.error("Error fetching data: ", error)
-            }
+        } catch (error) {
+            console.error("Error fetching data: ", error)
         }
+        setInitialLoading(false)
+    }
+
+    //Load current song when page loads initially
+    useEffect(() => {
+        
+        setInitialLoading(true)
         if (songId) {
             setIsNew(false)
             fetchSong(songId)
         }
+        else
+        setInitialLoading(false)
     }, [])
 
+
+    //Show loading when initial loading is in progress
+    if(isInitialLoading){
+        return (
+            <h1>Loading...</h1>
+        )
+    }
 
     return (
         <main>
@@ -245,15 +194,13 @@ const EditSample = () => {
                     <h4>Instrument</h4>
                 </div>
                 <div className="sequence-row-container">
-                    <button className={(type === 'guitar') ? 'toggle-selected' : 'toggle'} onClick={() => setType('guitar')}>Guitar</button>
-                    <button className={(type === 'piano') ? 'toggle-selected' : 'toggle'} onClick={() => setType('piano')}>Piano</button>
-                    <button className={(type === 'violin') ? 'toggle-selected' : 'toggle'} onClick={() => setType('violin')}>Violin</button>
-                    <button className={(type === 'drums') ? 'toggle-selected' : 'toggle'} onClick={() => setType('drums')}>Drums</button>
+                    <button className={(type === 'guitar') ? 'toggle-selected' : 'toggle'} onClick={() => setType('guitar')} disabled={isPlaying}>Guitar</button>
+                    <button className={(type === 'piano') ? 'toggle-selected' : 'toggle'} onClick={() => setType('piano')} disabled={isPlaying}>Piano</button>
+                    <button className={(type === 'violin') ? 'toggle-selected' : 'toggle'} onClick={() => setType('violin')} disabled={isPlaying}>Violin</button>
+                    <button className={(type === 'drums') ? 'toggle-selected' : 'toggle'} onClick={() => setType('drums')} disabled={isPlaying}>Drums</button>
                 </div>
             </div>
-
             {
-
                 recordingData.map((data, index) => {
                     const note = Object.keys(data)[0]
                     const values = data[note]
@@ -272,31 +219,6 @@ const EditSample = () => {
                     )
                 })
             }
-
-
-            {/* <div className="toggle-row-container">
-                <div className="row-label">
-                    <h4>A</h4>
-                </div>
-                <div className="sequence-row-container">
-                    <button className="toggle-selected"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle-selected"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle-selected"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle-selected"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle"></button>
-                    <button className="toggle"></button>
-                </div>
-            </div> */}
         </main>
     )
 }

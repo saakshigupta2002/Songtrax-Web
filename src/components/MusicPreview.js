@@ -1,19 +1,19 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import * as Tone from 'tone';
-import MusicSpinner from './animations/MusicSpinner';
 
 const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }) => {
-    // State to control playback
+
     Tone.start();
     const [isPlaying, setIsPlaying] = useState(false);
     const [noteDuration, setNoteDuration] = useState('4n')
     const [startTime, setStartTime] = useState(0.5)
 
-    const instrument = useRef(null); // Use useRef to store the instrument
+    //references for instrument and sequence to be played for easy reference
+    const instrument = useRef(null); 
     const sequenceRef = useRef(null)
 
-    // create sampler instance
+    //Set the instrument through sound samples
     const createSampler = () => {
         switch (instrumentName) {
             case 'piano':
@@ -72,8 +72,7 @@ const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }
                 setStartTime(0.25)
 
                 return
-            default:
-                // Default to a PolySynth if instrumentName is unrecognized
+            default: //piano will be loaded by default if the instrument name is not found
                 instrument.current = new Tone.Sampler({
                     C4: '/assets/piano/C4.mp3',
                     D4: '/assets/piano/D4.mp3',
@@ -94,11 +93,13 @@ const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }
         return () => {
             transport.off('stop');
         };
-    }, [instrumentName]);
+    }, [instrumentName]); //component should re-render if the instrument is changed
 
+
+    //Handle when user press preview or stop previewing button
     const togglePlayback = async () => {
         if (transport.state === 'started') {
-            // If the central transport is playing, stop it
+
             if (sequenceRef.current) {
                 sequenceRef.current.stop();
                 sequenceRef.current = null
@@ -140,14 +141,14 @@ const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }
         const sequence = new Tone.Part((time, event) => {
             instrument.current.triggerAttackRelease(event.note, event.duration, time);
         }, notesSequence);
-        // if (!sequence.current)
+
         sequenceRef.current = sequence
         sequence.start()
         const totalDuration = notesSequence.reduce((duration, event) => {
             return Math.max(duration, parseFloat(event.time) + parseFloat(event.duration));
         }, 0);
 
-        // Schedule a callback to stop the transport after the sequence finishes
+        //Stop the sound and toggle the button when music finishes
         transport.scheduleOnce(() => {
             if (sequenceRef.current) {
                 sequenceRef.current.stop()
@@ -161,13 +162,9 @@ const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }
 
     };
 
-
+//Returns a preview button which will play music
     return (
         <>
-        {/* {
-isPlaying &&
-        <MusicSpinner />
-        } */}
         <button onClick={(e)=>{e.preventDefault();togglePlayback()}} className={isPlaying ? "dark-button" : "bright-button"}>
             {isPlaying ? 'Stop Previewing' : 'Preview'}
         </button>

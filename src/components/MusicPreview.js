@@ -26,8 +26,6 @@ const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }
                     A4: '/assets/piano/A4.mp3',
                     B4: '/assets/piano/B4.mp3',
                 }).toDestination();
-                setNoteDuration('4n')
-                setStartTime(0.5)
 
                 return
             case 'guitar':
@@ -40,8 +38,6 @@ const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }
                     A4: '/assets/guitar/A4.mp3',
                     B4: '/assets/guitar/B4.mp3',
                 }).toDestination();
-                setNoteDuration('4n')
-                setStartTime(0.5)
 
                 return
             case 'violin':
@@ -54,8 +50,6 @@ const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }
                     A4: '/assets/violin/A4.mp3',
                     B4: '/assets/violin/A5.mp3',
                 }).toDestination();
-                setNoteDuration('2n')
-                setStartTime(1)
 
                 return
             case 'drums':
@@ -68,8 +62,6 @@ const MusicPreview = ({ instrumentName, musicData, transport, onPlaybackChange }
                     A4: '/assets/drums/A4.mp3',
                     B4: '/assets/drums/B4.mp3',
                 }).toDestination();
-                setNoteDuration('8n')
-                setStartTime(0.25)
 
                 return
             default: //piano will be loaded by default if the instrument name is not found
